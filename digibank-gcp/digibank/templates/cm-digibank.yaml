@@ -1,0 +1,24 @@
+apiVersion: v1
+data:
+  SPRING_ARTEMIS_MODE: "{{ .Values.configMap.digibank.SPRING_ARTEMIS_MODE }}"
+  LOGGING_LEVEL_IO_DEMO_BANK: "{{ .Values.configMap.digibank.LOGGING_LEVEL_IO_DEMO_BANK }}"
+  LOGGING_LEVEL_IO_DIGISIC_CREDIT: "{{ .Values.configMap.digibank.LOGGING_LEVEL_IO_DIGISIC_CREDIT }}"
+  SPRING_ARTEMIS_MODE: "{{ .Values.configMap.digibank.SPRING_ARTEMIS_MODE }}"
+  SPRING_ARTEMIS_HOST: "{{ .Values.configMap.digibank.SPRING_ARTEMIS_HOST }}"
+  SPRING_ARTEMIS_PORT: "{{ .Values.configMap.digibank.SPRING_ARTEMIS_PORT }}"
+  IO_DIGISIC_CREDIT_APP_PROCESS_ENABLED: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_APP_PROCESS_ENABLED }}"
+  IO_DIGISIC_CREDIT_APP_PROCESS_TIME: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_APP_PROCESS_TIME }}"
+  IO_DIGISIC_PARTNER_CREDIT_APP_REQUEST: "{{ .Values.configMap.digibank.IO_DIGISIC_PARTNER_CREDIT_APP_REQUEST }}"
+  IO_DIGISIC_PARTNER_CREDIT_APP_RESPONSE: "{{ .Values.configMap.digibank.IO_DIGISIC_PARTNER_CREDIT_APP_RESPONSE }}"          
+  IO_DIGISIC_CREDIT_ENABLED:  "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_ENABLED }}"
+  IO_DIGISIC_CREDIT_PROTOCOL: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_PROTOCOL }}"
+  IO_DIGISIC_CREDIT_HOST: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_HOST }}"
+  IO_DIGISIC_CREDIT_PORT: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_PORT }}"
+  IO_DIGISIC_CREDIT_CONTEXT-PATH-PATH: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_CONTEXT_PATH_PATH }}"
+  IO_DIGISIC_CREDIT_USERNAME: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_USERNAME }}"
+  IO_DIGISIC_CREDIT_PASSWORD: "{{ .Values.configMap.digibank.IO_DIGISIC_CREDIT_PASSWORD }}"
+
+kind: ConfigMap
+metadata:
+  name: cm-digibank
+  namespace: digibank

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digital-bank-credit-deployment
+  namespace: digibank
+  labels:
+    app: digital-bank-credit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-credit
+  template:
+    metadata:
+      labels:
+        app: digital-bank-credit
+    spec:
+      containers:
+      - name: digital-bank-credit
+        image: "{{ .Values.image.credit }}"
+        resources:
+          requests:
+            memory: "512M"
+            cpu: "500m"
+          limits:
+            memory: "2048M"
+            cpu: "700m"
+        ports:
+          - name: db-credit-port
+            containerPort: 8080
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "{{ .Values.otelresource }}"       
+        - name: OTEL_SERVICE_NAME
+          value: "credit"               
+        - name: SPRING_ARTEMIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-artemis
+              key: SPRING_ARTEMIS_USER  
+        - name: SPRING_ARTEMIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-artemis
+              key: SPRING_ARTEMIS_PASSWORD    
+        envFrom:
+        - configMapRef:
+            name: cm-digibank
+     
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: digital-bank-credit-svc
+  namespace: digibank
+spec:
+  selector:
+    app: digital-bank-credit
+  #type: NodePort
+  ports:
+    - name: http-credit
+      port: 8085  
+      targetPort: db-credit-port
+

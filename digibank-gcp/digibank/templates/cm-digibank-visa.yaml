@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  IO_DIGISIC_BANK_VISA_PROTOCOL: "{{ .Values.configMap.visa.IO_DIGISIC_BANK_VISA_PROTOCOL }}"
+  IO_DIGISIC_BANK_VISA_HOST: "{{ .Values.configMap.visa.IO_DIGISIC_BANK_VISA_HOST }}"
+  IO_DIGISIC_BANK_VISA_PORT: "{{ .Values.configMap.visa.IO_DIGISIC_BANK_VISA_PORT }}"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: cm-digibank-visa
+  namespace: digibank

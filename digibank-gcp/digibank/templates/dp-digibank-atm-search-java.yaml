@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digital-bank-backends-atm-java-deployment
+  namespace: digibank-backends
+  labels:
+    app: digital-bank-backends-atm-java
+    tier: backend
+    tier-name: backend-atm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-backends-atm-java
+  template:
+    metadata:
+      labels:
+        app: digital-bank-backends-atm-java
+        tier: backend
+        tier-name: backend-atm        
+    spec:
+      containers:
+      - name: digital-bank-backends-atm-java
+        image: "{{ .Values.image.atm }}"
+        resources:
+          requests:
+            memory: "512M"
+            cpu: "500m"
+          limits:
+            memory: "2048M"
+            cpu: "700m"
+        ports:
+          - name: atm-port
+            containerPort: 8081
+        env:
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "{{ .Values.otelresource }}"        
+          - name: SLOW_ZIP
+            value: "{{ .Values.configMap.atm.SLOW_ZIP }}"
+          - name: ERROR_ZIP
+            value: "{{ .Values.configMap.atm.ERROR_ZIP }}"
+
+#          - name: OTEL_RESOURCE_ATTRIBUTES
+#            value: "service.name=digibank-java-atm-backend,service.namespace=digibank"     
+          - name: EXTERNAL_CALL
+            value: "{{ .Values.configMap.atm.EXTERNAL_CALL }}"  
+          - name: EXTERNAL_URL
+            value: "{{ .Values.configMap.atm.EXTERNAL_URL }}"                                 
+#          - name: OTEL_SERVICE_NAME
+#            value: "digibank-java-backend"             
+          - name: OTEL_SERVICE_NAME
+            value: "atm-java"  
+
+
+

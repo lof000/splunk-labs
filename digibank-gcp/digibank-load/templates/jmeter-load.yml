@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digital-bank-jmeter-deployment
+  namespace: digibank-load
+  labels:
+    app: digital-bank-jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-jmeter
+  template:
+    metadata:
+      labels:
+        app: digital-bank-jmeter
+    spec:
+      containers:
+      - name: digital-bank-jmeter
+        image: leandrobroadcom/jmeter:1.0
+        volumeMounts:
+        - name: scriptvol
+          mountPath: "/opt/jmeter/scripts"
+          readOnly: true        
+        envFrom:
+          - configMapRef:
+              name: jmeter-configmap-load
+        env:
+          - name: USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: USERNAME
+                name: jmeter-secret
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: PASSWORD
+                name: jmeter-secret
+
+      volumes:
+      - name: scriptvol
+        configMap:
+          name: jmeter-configmap-load
+

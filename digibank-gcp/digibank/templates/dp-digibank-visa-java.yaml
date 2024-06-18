@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digital-bank-backends-visa-java-deployment
+  namespace: digibank-backends
+  labels:
+    app: digital-bank-backends-visa-java
+    tier: backend
+    tier-name: backend-visa    
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-backends-visa-java
+  template:
+    metadata:
+      labels:
+        app: digital-bank-backends-visa-java
+        tier: backend
+        tier-name: backend-visa           
+    spec:
+      containers:
+      - name: digital-bank-backends-visa-java
+        image: "{{ .Values.image.visa }}"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "512M"
+            cpu: "500m"
+          limits:
+            memory: "2048M"
+            cpu: "700m"
+        ports:
+          - name: visa-port
+            containerPort: 8081
+        env:
+#          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+#            value: "{{ .Values.otelexporter }}"  
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "{{ .Values.otelresource }}"   
+          - name: OTEL_SERVICE_NAME
+            value: "visapay-java"                                  
+          - name: SLOW_REGION
+            value: "{{ .Values.configMap.visa.SLOW_REGION }}"  
+          - name: SLOW_TIME
+            value: "{{ .Values.configMap.visa.SLOW_TIME }}"             
+          - name: AWS_API_URL
+            value: "{{ .Values.configMap.visa.AWS_API_URL }}"           
+          - name: ERROR_REGION
+            value: "{{ .Values.configMap.visa.ERROR_REGION }}"
+
+
+
+

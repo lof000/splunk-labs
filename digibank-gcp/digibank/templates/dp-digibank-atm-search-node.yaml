@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: digital-bank-backends-atm-node
+    tier: backend
+    tier-name: backend-atm    
+  name: digital-bank-backends-atm-node-deployment
+  namespace: digibank-backends
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-backends-atm-node
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: digital-bank-backends-atm-node
+        tier: backend
+        tier-name: backend-atm              
+    spec:
+      containers:
+      - image: "{{ .Values.image.atm_node }}"
+        name: digital-bank-backends-atm-node
+        ports:
+          - name: atm-port
+            containerPort: 3000    
+        env:
+#          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+#            value: "{{ .Values.otelexporter }}"  
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "{{ .Values.otelresource }}"   
+          - name: OTEL_SERVICE_NAME
+            value: "atm-node"                   
+        resources: {}
+status: {}

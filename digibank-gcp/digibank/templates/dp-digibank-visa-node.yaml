@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: digital-bank-backends-visa-node
+    tier: backend
+    tier-name: backend-visa    
+  name: digital-bank-backends-visa-node-deployment
+  namespace: digibank-backends
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank-backends-visa-node
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: digital-bank-backends-visa-node
+        tier: backend
+        tier-name: backend-visa              
+    spec:
+      containers:
+      - image: "{{ .Values.image.visa_node }}"
+              
+        name: digital-bank-backends-visa-node
+        ports:
+          - name: visa-port
+            containerPort: 3000   
+        env:
+#          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+#            value: "{{ .Values.otelexporter }}"  
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "{{ .Values.otelresource }}"   
+          - name: OTEL_SERVICE_NAME
+            value: "visapay-node"                                  
+        resources: {}
+status: {}
+

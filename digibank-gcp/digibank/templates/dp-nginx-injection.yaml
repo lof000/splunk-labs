@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+  namespace: digibank  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80        
+        resources: {}
+        volumeMounts:
+        - name: mysite-configs
+          mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: mysite-configs
+          configMap:
+            name: nginx-conf
+status: {}

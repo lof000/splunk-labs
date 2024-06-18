@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  name: play
+  namespace: digibank  
+spec:
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      name: play
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - image: leandrovo/digibank-synth:latest
+            name: play
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: '*/5 * * * *'
+status: {}

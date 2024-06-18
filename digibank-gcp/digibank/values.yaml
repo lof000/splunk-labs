@@ -1,0 +1,75 @@
+# Default values for digibank.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+otelresource: "service.namespace=digibank"
+#otelexporter: "http://appdynamics-otel-collector-service.appdynamics.svc.cluster.local:4318"
+
+secret:
+  mysql:
+#    SPRING_DATASOURCE_PASSWORD: RGVtbzEyMw==
+    SPRING_DATASOURCE_PASSWORD: RGVtbzEyMyE=
+
+    SPRING_DATASOURCE_USERNAME: ZGlnaXRhbHVzZXI=
+  artemis:  
+    SPRING_ARTEMIS_USER: YWRtaW4=
+    SPRING_ARTEMIS_PASSWORD: YWRtaW4=    
+
+configMap:
+  digibank:
+    SPRING_ARTEMIS_MODE: "native"
+    LOGGING_LEVEL_IO_DEMO_BANK: "INFO"
+    LOGGING_LEVEL_IO_DIGISIC_CREDIT: "INFO"
+    SPRING_ARTEMIS_HOST: "digital-bank-broker-svc"
+    SPRING_ARTEMIS_PORT: "61616"
+    IO_DIGISIC_CREDIT_APP_PROCESS_ENABLED: "true"
+    IO_DIGISIC_CREDIT_APP_PROCESS_TIME: 20
+    IO_DIGISIC_PARTNER_CREDIT_APP_REQUEST: "CREDIT.APP.REQUEST"
+    IO_DIGISIC_PARTNER_CREDIT_APP_RESPONSE: "CREDIT.APP.RESPONSE"            
+    IO_DIGISIC_CREDIT_ENABLED: "true"
+    IO_DIGISIC_CREDIT_PROTOCOL: "http"
+    IO_DIGISIC_CREDIT_HOST: "digital-bank-credit-svc"
+    IO_DIGISIC_CREDIT_PORT: 8085
+    IO_DIGISIC_CREDIT_CONTEXT_PATH_PATH: "/credit"
+    IO_DIGISIC_CREDIT_USERNAME: "admin@demo.io"
+    IO_DIGISIC_CREDIT_PASSWORD: "Demo123!"  
+  visa:
+    IO_DIGISIC_BANK_VISA_PROTOCOL: "http"
+    IO_DIGISIC_BANK_VISA_HOST: "digital-bank-backends-visa-svc.digibank-backends.svc.cluster.local"
+    IO_DIGISIC_BANK_VISA_PORT: "8081"
+    AWS_API_URL: "https://0ai7z2mnc1.execute-api.us-east-1.amazonaws.com/serverless_lambda_stage/confirmPayment?Name=Terraform"
+    SLOW_REGION: "ABCD1234ABCD123"
+    SLOW_TIME: "6000"
+    ERROR_REGION: "BSB"
+  atm:
+    IO_DIGISIC_BANK_ATM_PROTOCOL: "http"
+    IO_DIGISIC_BANK_ATM_HOST: "digital-bank-backends-atm-svc.digibank-backends.svc.cluster.local"
+    IO_DIGISIC_BANK_ATM_PORT: "8081"
+    EXTERNAL_CALL: "y"
+    EXTERNAL_URL: "http://atm-nginx:80"
+    ERROR_ZIP: "15000"
+    SLOW_ZIP: "14759"
+  mysql:
+    SPRING_DATASOURCE_PLATFORM: "mysql"
+    SPRING_DATASOURCE_URL: "jdbc:mysql://digital-bank-mysql-svc:3306/digitalbank?useSSL=false&allowPublicKeyRetrieval=true"
+    SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "org.hibernate.dialect.MySQL5Dialect"  
+
+image:
+  bank: "leandrovo/digitalbank-new:3.0"
+  credit: "leandrovo/digitalcredit-new:3.0"
+  broker: "leandrovo/digitalbroker-new:3.0"
+  atm: "leandrovo/digitalbank-backend-java:3.0"
+  atm_node: "leandrovo/digitalbank-backend-node:1.0"    
+  visa: "leandrovo/digitalbank-backend-java:3.0"
+  visa_node: "leandrovo/digitalbank-backend-node:1.0"  
+  tag: ""
+
+extraConfig:
+  java_options=""
+
+nginx:
+  snippet: |
+    'js snippet aqui..';
+  
