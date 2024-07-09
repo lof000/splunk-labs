@@ -1,0 +1,228 @@
+version: "3.4"
+
+services:
+
+# OTEL AGENT VOLUME (SIDECAR)
+  otel-agent-saas:
+    image: leandrovo/otel-agent-java:1.33.4
+    container_name: otel-java-agent
+    volumes:
+      - otel-agent-volume:/opt/agent
+
+# NGINX - INSTRUMENTED IMAGE
+  nginx:
+    image: leandrovo/nginx_otel:1.26.0
+    container_name: nginx
+    volumes:
+      - type: bind
+        source: ./opentelemetry_module.conf
+        target: /etc/nginx/conf.d/opentelemetry_module.conf
+      - type: bind
+        source: ./default-front.conf
+        target: /etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - bank
+
+# OTEL COLLECTOR
+
+  otelcol:
+    image: quay.io/signalfx/splunk-otel-collector:latest
+    container_name: otel-col
+    deploy:
+      resources:
+        limits:
+          memory: 125M
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-config.yml"]
+    volumes:
+      - ./otelcol-config.yml:/etc/otelcol-config.yml
+      - ./logs:/logs
+      - ./checkpoint:/checkpoint
+    ports:
+      - "4317" # OTLP over gRPC receiver
+      - "4318" # OTLP over HTTP receiver
+      - "9464"
+      - "8888"
+      - "13133"
+      - "14250"
+      - "14268"
+      - "6060"
+      - "9080"
+      - "9411"
+      - "9943"
+      - "7276"
+    environment:
+      SPLUNK_ACCESS_TOKEN: ${SPLUNK_ACCESS_TOKEN}
+      SPLUNK_REALM: ${SPLUNK_REALM}
+      DEPLOYMENT_ENV: ${DEPLOYMENT_ENV}
+
+###################################
+### DIGITAL BANKING APP - BEGIN
+###################################
+
+  broker:
+    image: leandrovo/digitalbroker-new:3.0
+    container_name: broker
+    hostname: broker
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    restart: unless-stopped      
+
+  credit:
+    image: leandrovo/digitalcredit-new:3.0
+    container_name: credit
+    hostname: credit
+    environment:
+
+      # Debug Options
+      LOGGING_LEVEL_IO_DIGISIC_CREDIT: INFO
+
+      # Digital Broker Connection
+      SPRING_ARTEMIS_MODE: native
+      SPRING_ARTEMIS_HOST: broker
+      SPRING_ARTEMIS_PORT: 61616
+      SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_PASSWORD: admin
+
+      # Credit Application Process
+      IO_DIGISIC_CREDIT_APP_PROCESS_ENABLED: 'true'
+      IO_DIGISIC_CREDIT_APP_PROCESS_TIME: 20
+
+      # Digital Credit Application Process JMS Queues
+      IO_DIGISIC_PARTNER_CREDIT_APP_REQUEST: CREDIT.APP.REQUEST
+      IO_DIGISIC_PARTNER_CREDIT_APP_RESPONSE: CREDIT.APP.RESPONSE
+
+      #APM AGENT VARIABLES
+      JAVA_TOOL_OPTIONS: '-javaagent:/opt/agent/opentelemetry-javaagent.jar'
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=credit,service.namespace=${DEPLOYMENT_ENV},deployment.environment=${DEPLOYMENT_ENV}
+
+    depends_on:
+      - broker
+
+    volumes:
+      - otel-agent-volume:/opt/agent
+    restart: unless-stopped      
+
+  bank:
+    image: leandrovo/digitalbank-new:3.0
+    container_name: bank
+    hostname: bank
+    environment:
+
+      # Debug Options
+      LOGGING_LEVEL_IO_DIGISIC_BANK: INFO
+      
+      # Digital Broker connection
+      SPRING_ARTEMIS_MODE: native
+      SPRING_ARTEMIS_HOST: broker
+      SPRING_ARTEMIS_PORT: 61616
+      SPRING_ARTEMIS_USER: admin
+      SPRING_ARTEMIS_PASSWORD: admin
+
+      # Digital Credit Connection
+      IO_DIGISIC_CREDIT_ENABLED: 'true'
+      IO_DIGISIC_CREDIT_PROTOCOL: http
+      IO_DIGISIC_CREDIT_HOST: credit
+      IO_DIGISIC_CREDIT_PORT: 8080
+      IO_DIGISIC_CREDIT_CONTEXT-PATH: /credit
+      IO_DIGISIC_CREDIT_USERNAME: admin@demo.io
+      IO_DIGISIC_CREDIT_PASSWORD: Demo123!
+
+      # Digital Credit Application Process JMS Queues
+      IO_DIGISIC_PARTNER_CREDIT_APP_REQUEST: CREDIT.APP.REQUEST
+      IO_DIGISIC_PARTNER_CREDIT_APP_RESPONSE: CREDIT.APP.RESPONSE
+
+      # ATM Location Service Connection 
+      IO_DIGISIC_BANK_ATM_PROTOCOL: http
+      IO_DIGISIC_BANK_ATM_HOST: atm-search
+      IO_DIGISIC_BANK_ATM_PORT: 8081
+
+      # VISA Direct Payment Service
+      IO_DIGISIC_BANK_VISA_PROTOCOL: http
+      IO_DIGISIC_BANK_VISA_HOST: visa
+      IO_DIGISIC_BANK_VISA_PORT: 8081
+      
+      # Open Banking API Service
+      IO_DIGISIC_BANK_OBP_ENABLED: 'true'
+      IO_DIGISIC_BANK_OBP_CONSUMER_KEY: vwfpvwfr1kngt0up2jelebzmvxrhst4vhxvw1jm3
+      IO_DIGISIC_BANK_OBP_VERSION: v4.0.0
+      IO_DIGISIC_BANK_OBP_PROTOCOL: https
+      IO_DIGISIC_BANK_OBP_HOST:
+      IO_DIGISIC_BANK_OBP_PORT:
+
+      #APM AGENT VARIABLES
+      JAVA_TOOL_OPTIONS: '-javaagent:/opt/agent/opentelemetry-javaagent.jar'
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=bankfront,service.namespace=${DEPLOYMENT_ENV},deployment.environment=${DEPLOYMENT_ENV}
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - broker
+      - credit
+
+    volumes:
+      - otel-agent-volume:/opt/agent
+    restart: unless-stopped       
+
+  atm-search:
+    image: leandrovo/digitalbank-backend-java:3.0
+    container_name: backends-atm-java
+    ports:
+      - "10081:8081"
+    environment:
+      # zipcode that causes slowdon
+      SLOW_ZIP: 14758
+
+      #APM AGENT VARIABLES
+      JAVA_TOOL_OPTIONS: '-javaagent:/opt/agent/opentelemetry-javaagent.jar'
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=atm-search,service.namespace=${DEPLOYMENT_ENV},deployment.environment=${DEPLOYMENT_ENV}
+  
+
+    #APM - ADD AGENT VOLUME
+    volumes:
+      - otel-agent-volume:/opt/agent
+    restart: unless-stopped 
+
+  visa:
+    image: leandrovo/digitalbank-backend-java:3.0
+    container_name: backends-visa-java
+    ports:
+      - "10082:8081"
+    environment:
+      #APM AGENT VARIABLES
+      JAVA_TOOL_OPTIONS: '-javaagent:/opt/agent/opentelemetry-javaagent.jar'
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_ENDPOINT}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=visa,service.namespace=${DEPLOYMENT_ENV},deployment.environment=${DEPLOYMENT_ENV}
+   
+    #APM - ADD AGENT VOLUME
+    volumes:
+      - otel-agent-volume:/opt/agent
+    restart: unless-stopped 
+
+
+  jmeter:
+    image: leandrovo/jmeter:1.0
+    hostname: jmeter
+    container_name: jmeter
+    restart: always
+    volumes:
+      - ${PWD}/scripts:/opt/jmeter/scripts
+    environment:
+      BASE_URL_1: "nginx"
+      HTTP_PORT: "80"
+      USERNAME: "jsmith@demo.io"
+      PASSWORD: "Demo123!"
+      BASE_URL_API_GATEWAY: "bank"
+      BASE_GATEWAY_PORT: "8081"
+
+
+#APM ADD AGENT VOLUME
+volumes:
+   otel-agent-volume:    
