@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digital-bank-front
+  namespace: digibank
+  labels:
+    app: digital-bank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: digital-bank
+  template:
+    metadata:
+      labels:
+        app: digital-bank
+    spec:
+      containers:
+      - name: digital-bank
+        image: "{{ .Values.image.bank }}"
+        resources:
+          requests:
+            memory: "512M"
+            cpu: "500m"
+          limits:
+            memory: "2048M"
+            cpu: "750m"
+        ports:
+          - name: db-bank-port
+            containerPort: 8080
+        env:
+        - name: SPRING_ARTEMIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-artemis
+              key: SPRING_ARTEMIS_USER  
+        - name: SPRING_ARTEMIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-artemis
+              key: SPRING_ARTEMIS_PASSWORD    
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-mysql
+              key: SPRING_DATASOURCE_USERNAME
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sec-digibank-mysql
+              key: SPRING_DATASOURCE_PASSWORD    
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "{{ .Values.otelresource }}"    
+        - name: OTEL_SERVICE_NAME
+          value: "frontend"                             
+        envFrom:
+        - configMapRef:
+            name: cm-digibank
+        - configMapRef:
+            name: cm-digibank-atm-search          
+        - configMapRef:
+            name: cm-digibank-visa
+        - configMapRef:
+            name: cm-digibank-opb
+        - configMapRef:
+            name: cm-digibank-db
+           
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: digital-bank-svc
+  namespace: digibank
+spec:
+  selector:
+    app: digital-bank
+  ports:
+    - name: http
+      port: 8080  
+      targetPort:  db-bank-port
+#use a nodeport for testing in local envs - like k8s in mac or minikube
+#  type: NodePort
+#user this in prod
+  type: LoadBalancer
+

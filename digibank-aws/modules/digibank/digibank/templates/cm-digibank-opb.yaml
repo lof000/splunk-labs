@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  IO_DIGISIC_BANK_OBP_ENABLED: "true"
+  IO_DIGISIC_BANK_OBP_CONSUMER_KEY: "vwfpvwfr1kngt0up2jelebzmvxrhst4vhxvw1jm3"  
+  IO_DIGISIC_BANK_OBP_VERSION: "v4.0.0"  
+  IO_DIGISIC_BANK_OBP_PROTOCOL: "https" 
+  IO_DIGISIC_BANK_OBP_HOST: ""
+  IO_DIGISIC_BANK_OBP_PORT: ""
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: cm-digibank-opb
+  namespace: digibank

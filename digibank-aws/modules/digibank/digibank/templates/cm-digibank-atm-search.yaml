@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  IO_DIGISIC_BANK_ATM_PROTOCOL: "{{ .Values.configMap.atm.IO_DIGISIC_BANK_ATM_PROTOCOL }}"
+  IO_DIGISIC_BANK_ATM_HOST: "{{ .Values.configMap.atm.IO_DIGISIC_BANK_ATM_HOST }}"
+  IO_DIGISIC_BANK_ATM_PORT: "{{ .Values.configMap.atm.IO_DIGISIC_BANK_ATM_PORT }}"
+kind: ConfigMap
+metadata:
+  name: cm-digibank-atm-search
+  namespace: digibank

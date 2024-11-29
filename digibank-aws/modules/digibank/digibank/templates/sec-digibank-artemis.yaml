@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  SPRING_ARTEMIS_USER: {{ .Values.secret.artemis.SPRING_ARTEMIS_USER }}
+  SPRING_ARTEMIS_PASSWORD: {{ .Values.secret.artemis.SPRING_ARTEMIS_PASSWORD }}
+kind: Secret
+metadata:
+  name: sec-digibank-artemis
+  namespace: digibank
+
+

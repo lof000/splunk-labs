@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: digibank-cron-load-slow
+  namespace: digibank-load
+spec:
+  schedule: "*/10 * * * *"  
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: digital-bank-jmeter-uc
+              image: leandrobroadcom/jmeter:1.0
+              volumeMounts:
+              - name: scriptvol
+                mountPath: "/opt/jmeter/scripts/"
+                readOnly: true        
+              envFrom:
+                - configMapRef:
+                    name: jmeter-configmap
+              env:
+                - name: USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: USERNAME
+                      name: jmeter-secret
+                - name: PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: PASSWORD
+                      name: jmeter-secret       
+          volumes:
+          - name: scriptvol
+            configMap:
+              name: jmeter-configmap
+          restartPolicy:  Never
+      backoffLimit: 3
