@@ -13,22 +13,22 @@ The architecture involves deploying the Splunk OpenTelemetry Collector within th
 
 To implement this solution, ensure you have the following prerequisites:
 
-* [cite_start]Active Splunk Cloud instance [cite: 5]
-* [cite_start]Active Splunk o11y instance [cite: 5]
-* [cite_start]AWS Permissions [cite: 5]
-* [cite_start]Terraform [cite: 5]
-* [cite_start]Docker [cite: 5]
-* [cite_start]AWS CLI [cite: 5]
+* Active Splunk Cloud instance 
+* Active Splunk o11y instance 
+* AWS Permissions 
+* Terraform 
+* Docker 
+* AWS CLI 
 
 ## Setup Steps
 
-[cite_start]To get an overview of all the components in this environment, follow these steps[cite: 2]:
+To get an overview of all the components in this environment, follow these steps:
 
 ### 1. Add the Splunk OTel Collector to the ECS Cluster
 
-[cite_start]For this Proof of Concept (PoC), the Splunk OTel Collector will be deployed within the same cluster where the application is running[cite: 6]. [cite_start]We will modify the existing Terraform script that deploys the application container to include the OTel Collector[cite: 7].
+For this Proof of Concept (PoC), the Splunk OTel Collector will be deployed within the same cluster where the application is running. We will modify the existing Terraform script that deploys the application container to include the OTel Collector.
 
-[cite_start]Add the following lines to your Terraform script (specifically, after the application container definition) that creates your ECS cluster[cite: 8]:
+Add the following lines to your Terraform script (specifically, after the application container definition) that creates your ECS cluster:
 
 ```terraform
 {
@@ -78,9 +78,7 @@ To implement this solution, ensure you have the following prerequisites:
 }
 ````
 
-[cite\_start][cite: 9]
-
-[cite\_start]Add these variables to your `variables.tf` file[cite: 10]:
+Add these variables to your `variables.tf`
 
 ```terraform
 variable "SPLUNK_HEC_TOKEN" {
@@ -108,22 +106,21 @@ variable "splunk_realm" {
 }
 ```
 
-[cite\_start][cite: 11]
+
 
 ### 2\. Insert and Configure the Splunk Java Agent in the Spring Boot Application
 
-[cite\_start]Next, you need to include the Splunk Java agent in your Spring Boot application[cite: 12]. [cite\_start]For this PoC, we will directly include the agent in the Docker image[cite: 14].
+Next, you need to include the Splunk Java agent in your Spring Boot application. For this PoC, we will directly include the agent in the Docker image
 
-[cite\_start]First, download the agent[cite: 15, 16]:
+First, download the agent
 
 ```bash
 curl -L [https://github.com/signalfx/splunk-otel-java/releases/latest/download/splunk-otel-javaagent.jar](https://github.com/signalfx/splunk-otel-java/releases/latest/download/splunk-otel-javaagent.jar) \
 -o splunk-otel-javaagent.jar
 ```
 
-[cite\_start][cite: 16]
 
-[cite\_start]Then, modify your Dockerfile used to build the application image by adding the following line[cite: 17, 18]:
+Then, modify your Dockerfile used to build the application image by adding the following line:
 
 ```dockerfile
 FROM....,...,...,,
@@ -131,11 +128,11 @@ ADD splunk-otel-javaagent.jar /opt/agent/opentelemetry-javaagent.jar
 ....,....,
 ```
 
-[cite\_start][cite: 18]
 
-[cite\_start]Build and push the new version of your image to your repository[cite: 19].
 
-[cite\_start]Edit your Terraform file and add these environment variables directly under your application container definition[cite: 20]:
+Build and push the new version of your image to your repository
+
+Edit your Terraform file and add these environment variables directly under your application container definition:
 
 ```terraform
       "environment":[
@@ -157,9 +154,9 @@ ADD splunk-otel-javaagent.jar /opt/agent/opentelemetry-javaagent.jar
          }
 ```
 
-[cite\_start][cite: 21]
 
-[cite\_start]Add these variables to your `variables.tf` file[cite: 22]:
+
+Add these variables to your `variables.tf`:
 
 ```terraform
 variable "OTEL_EXPORTER_OTLP_ENDPOINT" {
@@ -183,14 +180,13 @@ variable "DEPLOYMENT_ENVIRONMENT" {
 }
 ```
 
-[cite\_start][cite: 23]
 
 ### 3\. Configure Splunk o11y Connection with AWS CloudWatch
 
-[cite\_start]For the purpose of this PoC, we will use the Polling method to establish the connection with AWS[cite: 25].
+For the purpose of this PoC, we will use the Polling method to establish the connection with AWS
 
 Open the following link and follow the instructions to configure the connection:
-[cite\_start][https://app.us1.signalfx.com/\#/gdi/aws/create/integration-summary?category=all\&gdiState=%7B%22integrationId%22:%22FfhrrZoAYAA%22%7D\&utm\_source=login.signalfx.com](https://app.us1.signalfx.com/#/gdi/aws/create/integration-summary?category=all&gdiState=%7B%22integrationId%22:%22FfhrrZoAYAA%22%7D&utm_source=login.signalfx.com) [cite: 26]
+[https://app.us1.signalfx.com/\#/gdi/aws/create/integration-summary?category=all\&gdiState=%7B%22integrationId%22:%22FfhrrZoAYAA%22%7D\&utm\_source=login.signalfx.com](https://app.us1.signalfx.com/#/gdi/aws/create/integration-summary?category=all&gdiState=%7B%22integrationId%22:%22FfhrrZoAYAA%22%7D&utm_source=login.signalfx.com)
 
 -----
 
