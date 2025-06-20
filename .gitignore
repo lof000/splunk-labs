@@ -1,2 +1,6 @@
 
 .DS_Store
+ecs-terraform/terraform.tfvars
+ecs-terraform/.terraform.lock.hcl
+/ecs-terraform/.terraform
+ecs-terraform/terraform.tfstate
