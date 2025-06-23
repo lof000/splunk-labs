@@ -128,13 +128,32 @@ ADD splunk-otel-javaagent.jar /opt/agent/opentelemetry-javaagent.jar
 ....,....,
 ```
 
+As an example, move the agent jar to the build folder
 
+In the build folder run this to build a new image with the agent inside
 
-Build and push the new version of your image to your repository
+```
+./build.sh <your_repo> digitalbank-backend-java 3.0
 
-Edit your Terraform file and add these environment variables directly under your application container definition:
+```
+
+After building push the image to your docker repo
+
+```
+./push.sh <your_repo> digitalbank-backend-java 3.0
+
+```
+
+### 3\. Edit your Terraform file and add these environment variables directly under your application container definition, also change the <repo> <image> <tag>
 
 ```terraform
+
+...
+
+"image":"<repo>/<image>>:<tag>",
+
+...
+
       "environment":[
          {
             "name":"OTEL_EXPORTER_OTLP_ENDPOINT",

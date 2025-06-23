@@ -4,3 +4,4 @@ ecs-terraform/terraform.tfvars
 ecs-terraform/.terraform.lock.hcl
 /ecs-terraform/.terraform
 ecs-terraform/terraform.tfstate
+ecs-terraform/terraform.tfstate.backup
